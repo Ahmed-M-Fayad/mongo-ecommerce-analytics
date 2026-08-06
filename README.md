@@ -15,13 +15,6 @@ referencing tradeoffs), PyMongo-driven ETL, and MongoDB aggregation pipeline que
 
 Raw data lives in `data/raw/` (see Data section below for why it's tracked this way).
 
-## Why this project
-
-Built after completing MongoDB fundamentals + PyMongo study, to fix the concepts by building
-something real rather than just running the lab assignment. Core goal: make a deliberate,
-documented schema design decision (what to embed vs. what to reference) and justify it —
-not just dump both CSVs into collections.
-
 ## Planned structure
 
 - [x] Data exploration (`reviews.csv` done — see `docs/reviews_data_exploration_report.md`; `products.csv` pending)
