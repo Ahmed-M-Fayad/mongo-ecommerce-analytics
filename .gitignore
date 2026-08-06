@@ -1,0 +1,30 @@
+# Python Byte-code & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment Variables & Secrets (MongoDB URIs/credentials)
+.env
+.env.*
+!.env.example
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# Data Files & Logs
+*.log
+# Uncomment the lines below if raw CSVs exceed GitHub's 50MB file size limit:
+# data/raw/*.csv
+# data/processed/
+# !data/raw/.gitkeep
