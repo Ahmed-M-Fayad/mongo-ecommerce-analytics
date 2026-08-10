@@ -17,7 +17,7 @@ Raw data lives in `data/raw/` (see Data section below for why it's tracked this 
 
 ## Planned structure
 
-- [x] Data exploration (`reviews.csv` done — see `docs/`; `products.csv` (In progress))
+- [x] Data exploration (`reviews.csv, products.csv` done — see `docs/`;)
 - [ ] Schema design doc (embed vs. reference decisions, with reasoning)
 - [ ] Extractor → Transformer → Loader pipeline (PyMongo)
 - [ ] Indexes justified by actual query patterns
