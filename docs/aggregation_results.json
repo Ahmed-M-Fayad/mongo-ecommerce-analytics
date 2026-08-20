@@ -1,0 +1,76 @@
+{
+  "summary": {
+    "products": 728,
+    "reviews": 6327,
+    "zero_review_products": 28,
+    "max_reviews_per_product": 19
+  },
+  "top_rated_products": [
+    {
+      "asin": "B0CS2YYTM4",
+      "title": "Hey Dude Wally Stretch Sox, Men\u2019s Shoes, Men's Slip-on Loafers, Comfortable & Light-Weight",
+      "avg_rating": 5.0,
+      "review_count": 10
+    },
+    {
+      "asin": "B0C7HKDQH3",
+      "title": "Carhartt Unisex Baby Long-Sleeve Pocket Bodysuit",
+      "avg_rating": 5.0,
+      "review_count": 10
+    },
+    {
+      "asin": "B0DN375DNC",
+      "title": "Polo Shirts for Men - Dry Fit Moisture Wicking Black Short Sleeve Performance Golf T Shirts for Casual Work Athletic",
+      "avg_rating": 5.0,
+      "review_count": 10
+    },
+    {
+      "asin": "B0CJWGMKVD",
+      "title": "Under Armour Boys' Tech Logo Shorts",
+      "avg_rating": 5.0,
+      "review_count": 5
+    },
+    {
+      "asin": "B074KL2SHP",
+      "title": "Wrangler Authentics Men's Regular Fit Comfort Flex Waist Jean",
+      "avg_rating": 4.93,
+      "review_count": 14
+    }
+  ],
+  "verified_vs_unverified": [
+    {
+      "verified": false,
+      "avg_rating": 4.42,
+      "avg_sentiment": 0.25
+    },
+    {
+      "verified": true,
+      "avg_rating": 4.54,
+      "avg_sentiment": 0.31
+    }
+  ],
+  "avg_price_by_category": [
+    {
+      "category": "Sports & Outdoors",
+      "avg_price": 38.4
+    },
+    {
+      "category": "Clothing, Shoes & Jewelry",
+      "avg_price": 35.36
+    },
+    {
+      "category": "Electronics",
+      "avg_price": 33.98
+    }
+  ],
+  "helpful_votes_by_image_presence": [
+    {
+      "has_image": false,
+      "avg_helpful_votes": 2.86
+    },
+    {
+      "has_image": true,
+      "avg_helpful_votes": 8.69
+    }
+  ]
+}

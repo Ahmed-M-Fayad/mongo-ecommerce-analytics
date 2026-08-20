@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>mongo-ecommerce-review-analytics — dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #fcfcfb;
+    --surface: #f1efe8;
+    --border: rgba(11,11,11,0.10);
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --blue: #2a78d6;
+    --gray: #898781;
+    --green: #1baf7a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a19;
+      --surface: #2c2c2a;
+      --border: rgba(255,255,255,0.10);
+      --text-primary: #f0efec;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+    }
+  }
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+  h1 { font-size: 22px; font-weight: 500; margin: 0 0 4px; }
+  p.subtitle { font-size: 14px; color: var(--text-secondary); margin: 0 0 2rem; }
+  h2 { font-size: 16px; font-weight: 500; margin: 0 0 12px; }
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 2rem; }
+  .card { background: var(--surface); border-radius: 8px; padding: 1rem; }
+  .card p.label { font-size: 13px; color: var(--text-secondary); margin: 0 0 4px; }
+  .card p.value { font-size: 24px; font-weight: 500; margin: 0; }
+  .chart-block { margin-bottom: 2.5rem; }
+  .chart-wrap { position: relative; width: 100%; height: 240px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .legend { display: flex; gap: 16px; margin-top: 12px; font-size: 12px; color: var(--text-secondary); }
+  .legend span { display: flex; align-items: center; gap: 4px; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  #status { font-size: 14px; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<h1>mongo-ecommerce-review-analytics</h1>
+<p class="subtitle">Aggregation results, read from docs/aggregation_results.json</p>
+
+<div id="status">Loading...</div>
+<div id="dashboard" style="display:none;">
+
+  <div class="metrics" id="metrics"></div>
+
+  <div class="chart-block">
+    <h2>Top rated products (min. 5 reviews)</h2>
+    <div class="chart-wrap">
+      <canvas id="topRated" role="img" aria-label="Bar chart of average rating for the top rated products"></canvas>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="chart-block">
+      <h2>Verified vs unverified purchases</h2>
+      <div class="chart-wrap" style="height:220px;">
+        <canvas id="verified" role="img" aria-label="Grouped bar chart comparing average rating and sentiment for verified vs unverified purchases"></canvas>
+      </div>
+      <div class="legend">
+        <span><span class="swatch" style="background:var(--gray)"></span>Unverified</span>
+        <span><span class="swatch" style="background:var(--blue)"></span>Verified</span>
+      </div>
+    </div>
+    <div class="chart-block">
+      <h2>Helpful votes by image presence</h2>
+      <div class="chart-wrap" style="height:220px;">
+        <canvas id="helpful" role="img" aria-label="Bar chart comparing average helpful vote count for reviews with and without an image"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-block">
+    <h2>Average price by category</h2>
+    <div class="chart-wrap" style="height:200px;">
+      <canvas id="category" role="img" aria-label="Horizontal bar chart of average price by product category"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<script>
+async function loadDashboard() {
+  const statusEl = document.getElementById("status");
+  let data;
+  try {
+    const res = await fetch("aggregation_results.json");
+    if (!res.ok) throw new Error("File not found");
+    data = await res.json();
+  } catch (e) {
+    statusEl.textContent = "Could not load aggregation_results.json — run 'python src/analytics.py' first, and open this file through a local server (not file://) if fetch is blocked.";
+    return;
+  }
+
+  statusEl.style.display = "none";
+  document.getElementById("dashboard").style.display = "block";
+
+  const metricsEl = document.getElementById("metrics");
+  const s = data.summary;
+  const metrics = [
+    ["Products", s.products],
+    ["Reviews", s.reviews],
+    ["Zero-review products", s.zero_review_products],
+    ["Max reviews / product", s.max_reviews_per_product],
+  ];
+  metricsEl.innerHTML = metrics.map(([label, value]) =>
+    `<div class="card"><p class="label">${label}</p><p class="value">${value}</p></div>`
+  ).join("");
+
+  const muted = "#898781";
+  const grid = { color: "rgba(137,135,129,0.15)" };
+  const baseOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: muted, font: { size: 11 } }, grid: { display: false } },
+      y: { ticks: { color: muted, font: { size: 11 } }, grid, border: { display: false } },
+    },
+  };
+
+  new Chart(document.getElementById("topRated"), {
+    type: "bar",
+    data: {
+      labels: data.top_rated_products.map(p => p.title.length > 28 ? p.title.slice(0, 28) + "…" : p.title),
+      datasets: [{ data: data.top_rated_products.map(p => p.avg_rating), backgroundColor: "#2a78d6", borderRadius: 4, maxBarThickness: 24 }],
+    },
+    options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y, min: 0, max: 5 } } },
+  });
+
+  const vLabels = ["Rating", "Sentiment"];
+  const unverified = data.verified_vs_unverified.find(d => !d.verified);
+  const verified = data.verified_vs_unverified.find(d => d.verified);
+  new Chart(document.getElementById("verified"), {
+    type: "bar",
+    data: {
+      labels: vLabels,
+      datasets: [
+        { label: "Unverified", data: [unverified.avg_rating, unverified.avg_sentiment], backgroundColor: "#898781", borderRadius: 4, maxBarThickness: 28 },
+        { label: "Verified", data: [verified.avg_rating, verified.avg_sentiment], backgroundColor: "#2a78d6", borderRadius: 4, maxBarThickness: 28 },
+      ],
+    },
+    options: baseOpts,
+  });
+
+  const noImage = data.helpful_votes_by_image_presence.find(d => !d.has_image);
+  const hasImage = data.helpful_votes_by_image_presence.find(d => d.has_image);
+  new Chart(document.getElementById("helpful"), {
+    type: "bar",
+    data: {
+      labels: ["No image", "Has image"],
+      datasets: [{ data: [noImage.avg_helpful_votes, hasImage.avg_helpful_votes], backgroundColor: ["#898781", "#1baf7a"], borderRadius: 4, maxBarThickness: 40 }],
+    },
+    options: baseOpts,
+  });
+
+  new Chart(document.getElementById("category"), {
+    type: "bar",
+    indexAxis: "y",
+    data: {
+      labels: data.avg_price_by_category.map(c => c.category),
+      datasets: [{ data: data.avg_price_by_category.map(c => c.avg_price), backgroundColor: "#2a78d6", borderRadius: 4, maxBarThickness: 24 }],
+    },
+    options: {
+      ...baseOpts,
+      scales: {
+        x: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => "$" + v } },
+        y: baseOpts.scales.x,
+      },
+    },
+  });
+}
+
+loadDashboard();
+</script>
+
+</body>
+</html>
